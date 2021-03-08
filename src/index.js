@@ -11,7 +11,13 @@ app.use(express.json());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+
+  if (!checksIfUsernameAlreadyExists(username)) {
+    return response.status(404).json({ error: 'There is no user with this username.' });
+  }
+
+  return next()
 }
 
 app.post('/users', (request, response) => {
@@ -34,7 +40,10 @@ app.post('/users', (request, response) => {
 });
 
 app.get('/todos', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers;
+  const todos = getTodosByUsername(username);
+
+  return response.status(200).json(...todos);
 });
 
 app.post('/todos', checksExistsUserAccount, (request, response) => {
@@ -55,6 +64,12 @@ app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
 
 function checksIfUsernameAlreadyExists(username) {
   return users.find(user => user.username === username)
+}
+
+function getTodosByUsername(username) {
+  return users
+    .filter(user => user.username === username)
+    .map(user => user.todos);
 }
 
 module.exports = app;
