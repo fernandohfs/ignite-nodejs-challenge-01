@@ -14,8 +14,12 @@ function checksExistsUserAccount(request, response, next) {
   // Complete aqui
 }
 
-app.post('/users', (request, response) => {  
+app.post('/users', (request, response) => {
   const { name, username } = request.body;
+
+  if (checksIfUsernameAlreadyExists(username)) {
+    return response.status(400).json({ error: 'There is already a user with this username.' });
+  }
 
   const user = {
     id: uuidv4(),
@@ -48,5 +52,9 @@ app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
   // Complete aqui
 });
+
+function checksIfUsernameAlreadyExists(username) {
+  return users.find(user => user.username === username)
+}
 
 module.exports = app;
