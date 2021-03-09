@@ -111,8 +111,16 @@ app.patch('/todos/:id/done', checksExistsUserAccount, checkExistsTodo, (request,
   return response.status(200).json(users[userIndex].todos[todoIndex]);
 });
 
-app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+app.delete('/todos/:id', checksExistsUserAccount, checkExistsTodo, (request, response) => {
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const userIndex = users.findIndex(user => user.username === username);
+  const todoIndex = users[userIndex].todos.findIndex(todo => todo.id === id);
+
+  users[userIndex].todos.splice(todoIndex, 1);
+
+  return response.status(204).send();
 });
 
 function checksIfUsernameAlreadyExists(username) {
