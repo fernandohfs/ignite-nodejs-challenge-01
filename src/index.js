@@ -96,8 +96,19 @@ app.put('/todos/:id', checksExistsUserAccount, checkExistsTodo, (request, respon
   return response.status(200).json(users[userIndex].todos[todoIndex]);
 });
 
-app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+app.patch('/todos/:id/done', checksExistsUserAccount, checkExistsTodo, (request, response) => {
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const userIndex = users.findIndex(user => user.username === username);
+  const todoIndex = users[userIndex].todos.findIndex(todo => todo.id === id);
+
+  users[userIndex].todos[todoIndex] = {
+    ...users[userIndex].todos[todoIndex],
+    done: true
+  };
+
+  return response.status(200).json(users[userIndex].todos[todoIndex]);
 });
 
 app.delete('/todos/:id', checksExistsUserAccount, (request, response) => {
