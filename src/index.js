@@ -66,7 +66,24 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
 });
 
 app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+  const { title, deadline } = request.body;
+
+  const userIndex = users.findIndex(user => user.username === username);
+  const todoIndex = users[userIndex].todos.findIndex(todo => todo.id === id);
+
+  if (todoIndex >= 0) {
+    users[userIndex].todos[todoIndex] = {
+      ...users[userIndex].todos[todoIndex],
+      title,
+      deadline
+    };
+  
+    return response.status(200).json(users[userIndex].todos[todoIndex]);
+  }
+
+  return response.status(404).json({ error: 'There is no todo with this id.' })
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
