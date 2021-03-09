@@ -20,6 +20,20 @@ function checksExistsUserAccount(request, response, next) {
   return next()
 }
 
+function checkExistsTodo(request, response, next) {
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const userIndex = users.findIndex(user => user.username === username);
+  const todoIndex = users[userIndex].todos.findIndex(todo => todo.id === id);
+
+  if (todoIndex === -1) {
+    return response.status(404).json({ error: 'There is no todo with this id.' })
+  }
+
+  return next();
+}
+
 app.post('/users', (request, response) => {
   const { name, username } = request.body;
 
@@ -59,13 +73,13 @@ app.post('/todos', checksExistsUserAccount, (request, response) => {
   };
 
   const userIndex = users.findIndex(user => user.username === username);
-  
+
   users[userIndex].todos.push(todo);
 
-  return response.status(201).json(todo);  
+  return response.status(201).json(todo);
 });
 
-app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
+app.put('/todos/:id', checksExistsUserAccount, checkExistsTodo, (request, response) => {
   const { username } = request.headers;
   const { id } = request.params;
   const { title, deadline } = request.body;
@@ -73,17 +87,13 @@ app.put('/todos/:id', checksExistsUserAccount, (request, response) => {
   const userIndex = users.findIndex(user => user.username === username);
   const todoIndex = users[userIndex].todos.findIndex(todo => todo.id === id);
 
-  if (todoIndex >= 0) {
-    users[userIndex].todos[todoIndex] = {
-      ...users[userIndex].todos[todoIndex],
-      title,
-      deadline
-    };
-  
-    return response.status(200).json(users[userIndex].todos[todoIndex]);
-  }
+  users[userIndex].todos[todoIndex] = {
+    ...users[userIndex].todos[todoIndex],
+    title,
+    deadline
+  };
 
-  return response.status(404).json({ error: 'There is no todo with this id.' })
+  return response.status(200).json(users[userIndex].todos[todoIndex]);
 });
 
 app.patch('/todos/:id/done', checksExistsUserAccount, (request, response) => {
